@@ -1,8 +1,6 @@
-module.exports = (function() {
-  function Calculate() {
-  }
+"use strict";
 
-  var proto = {
+module.exports =  {
     isNumber: function(n) {
       if (isNaN(n) || n === null || n === 'undefined') {
         throw Error('an element in your array is not a number');
@@ -26,9 +24,4 @@ module.exports = (function() {
         return [start+Math.floor(m)];
       }
     }
-  };
-
-  Calculate.prototype = Object.create(proto);
-
-  return Calculate;
-}());
+};

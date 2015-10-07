@@ -51,11 +51,11 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var calculations = __webpack_require__(2);
+	var c = __webpack_require__(2);
 	var $ = __webpack_require__(3);
 	$(document).ready(function() {
 	  (function() {
-	    var c = new calculations();
+	//    var c = new calculations();
 	    var mean = c.mean([1,2,3,4]);
 	    var med = c.median(0, 3);
 	    var m = c.median(0, 2);
@@ -69,11 +69,9 @@
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = (function() {
-	  function Calculate() {
-	  }
+	"use strict";
 
-	  var proto = {
+	module.exports =  {
 	    isNumber: function(n) {
 	      if (isNaN(n) || n === null || n === 'undefined') {
 	        throw Error('an element in your array is not a number');
@@ -97,12 +95,7 @@
 	        return [start+Math.floor(m)];
 	      }
 	    }
-	  };
-
-	  Calculate.prototype = Object.create(proto);
-
-	  return Calculate;
-	}());
+	};
 
 
 /***/ },
