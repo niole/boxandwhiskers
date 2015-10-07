@@ -51,16 +51,41 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var $ = __webpack_require__(2);
+	var calculations = __webpack_require__(2);
+	var $ = __webpack_require__(3);
 	$(document).ready(function() {
 	  (function() {
-	    console.log('ready');
+	    var c = new calculations([6,7,8,93,2]);
+	    console.log(c);
+	    var mean = c.mean();
+	    console.log(mean);
 	  }())
 	});
 
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	module.exports = (function() {
+	  function Calculate(data) {
+	    this.data = data;
+	  }
+
+	  var proto = {
+	    mean: function() {
+	      return (this.data.reduce(function(a,b) { return a+b; } ))/(this.data.length);
+	    }
+	  };
+
+	  Calculate.prototype = Object.create(proto);
+
+	  return Calculate;
+	}());
+
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
