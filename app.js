@@ -18,12 +18,14 @@ var compiler = webpack({
     alias: {
       'react': node_mods + '/react/dist/react.min.js',
       '$': node_mods + '/jquery/dist/jquery.min.js',
+      'lodash': node_mods + '/lodash',
       'd3': node_mods + '/d3/d3.min.js'
     }
   },
   module: {
     noParse: [node_mods + '/react/dist/react.min.js',
               node_mods + '/jquery/dist/jquery.min.js',
+              node_mods + '/lodash',
               node_mods + '/d3/d3.min.js'],
     loaders: [
       { test: /\.js$/, loader: 'jsx-loader' }

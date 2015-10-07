@@ -1,21 +1,12 @@
-var $ = require('jquery');
-var d3 = require('d3');
 var calculate = require('./calculations');
 
 module.exports = (function() {
-  function BoxData(data, width) {
+  function BoxData(data) {
     this.data = data;
-    this.width = width;
     this.IQR = this.getIQR(data);
     this.getEndVals(this.IQR, data, this.q1Val, this.q3Val);
   }
 
-  //need IQR so can make boxes and determine outliers
-  //need to make whiskers, will do seperately
-  //box needs a orientation
-  //width
-  //data
-  //
   BoxData.prototype.indxToVal = function(idxs, data) {
     return idxs.map(function(i) {
       return data[i];
