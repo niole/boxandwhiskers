@@ -6,13 +6,16 @@ module.exports =  {
         throw Error('an element in your array is not a number');
       }
     },
-    mean: function(data) {
+    sum: function(data) {
       var self = this;
-      return (data.reduce(function(a,b) {
+      return data.reduce(function(a,b) {
         self.isNumber(a);
         self.isNumber(b);
         return a+b;
-      } ))/(data.length);
+      });
+    },
+    mean: function(data) {
+      return (this.sum(data))/(data.length);
     },
     median: function(start, end) {
       var length = end-start+1;
