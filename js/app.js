@@ -1,4 +1,4 @@
-var b = require('./box');
+var b = require('./boxdata');
 var $ = require('jquery');
 $(document).ready(function() {
   (function() {

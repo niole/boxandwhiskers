@@ -57,6 +57,8 @@
 	  (function() {
 	    var box = new b([1,2,3,4]);
 	    var Box = new b([1,2,3]);
+	    console.log(box);
+	    console.log(Box);
 	  }())
 	});
 
@@ -70,10 +72,11 @@
 	var calculate = __webpack_require__(5);
 
 	module.exports = (function() {
-	  function Box(data, width) {
+	  function BoxData(data, width) {
 	    this.data = data;
 	    this.width = width;
-	    this.IQR = this.getIQR();
+	    this.IQR = this.getIQR(data);
+	    this.getEndVals(this.IQR, data, this.q1Val, this.q3Val);
 	  }
 
 	  //need IQR so can make boxes and determine outliers
@@ -82,23 +85,44 @@
 	  //width
 	  //data
 	  //
-	  Box.prototype.indxToVal = function(idxs, data) {
+	  BoxData.prototype.indxToVal = function(idxs, data) {
 	    return idxs.map(function(i) {
 	      return data[i];
 	    });
 	  };
 
-	  Box.prototype.getIQR = function() {
-	    //need: data, calculations obj
-	    //get medians and submedians
-	    this.median = calculate.median(0, this.data.length-1);
-	    this.q1 = calculate.median(0, this.median[0]);
-	    this.q3 = calculate.median(this.median[this.median.length-1], this.data.length-1);
-
-	    return Math.abs(calculate.sum(this.indxToVal(this.q1, this.data))/(this.q1.length) - calculate.sum(this.indxToVal(this.q3, this.data))/(this.q3.length));
+	  BoxData.prototype.getEndVals = function(IQR, data, q1Val, q3Val) {
+	    var maxDist = IQR*(1.5);
+	    this.outliers = [];
+	    for (var i=0; i < data.length; i++) {
+	      if (data[i] < q1Val-maxDist) {
+	        this.outliers.push(i);
+	      } else {
+	        this.startIndWhisker = i;
+	        break;
+	      }
+	    }
+	    for (var j=data.length-1; j >= 0; j--) {
+	      if (data[j] > q3Val+maxDist) {
+	        this.outliers.push(j);
+	      } else {
+	        this.endIndWhisker = j;
+	        break;
+	      }
+	    }
 	  };
 
-	  return Box;
+	  BoxData.prototype.getIQR = function(data) {
+	    this.q2 = calculate.median(0, data.length-1);
+	    this.q1 = calculate.median(0, this.q2[0]);
+	    this.q3 = calculate.median(this.q2[this.q2.length-1], data.length-1);
+	    this.q2Val = calculate.sum(this.indxToVal(this.q2, data))/(this.q2.length);
+	    this.q1Val = calculate.sum(this.indxToVal(this.q1, data))/(this.q1.length);
+	    this.q3Val = calculate.sum(this.indxToVal(this.q3, data))/(this.q3.length);
+	    return Math.abs(this.q3Val-this.q1Val);
+	  };
+
+	  return BoxData;
 	}());
 
 
