@@ -55,10 +55,12 @@
 	var $ = __webpack_require__(3);
 	$(document).ready(function() {
 	  (function() {
-	    var c = new calculations([6,7,8,93,2]);
-	    console.log(c);
-	    var mean = c.mean();
-	    console.log(mean);
+	    var c = new calculations();
+	    var mean = c.mean([1,2,3,4]);
+	    var med = c.median(0, 3);
+	    var m = c.median(0, 2);
+	    console.log(m);
+	    console.log(med);
 	  }())
 	});
 
@@ -68,13 +70,32 @@
 /***/ function(module, exports) {
 
 	module.exports = (function() {
-	  function Calculate(data) {
-	    this.data = data;
+	  function Calculate() {
 	  }
 
 	  var proto = {
-	    mean: function() {
-	      return (this.data.reduce(function(a,b) { return a+b; } ))/(this.data.length);
+	    isNumber: function(n) {
+	      if (isNaN(n) || n === null || n === 'undefined') {
+	        throw Error('an element in your array is not a number');
+	      }
+	    },
+	    mean: function(data) {
+	      var self = this;
+	      return (data.reduce(function(a,b) {
+	        self.isNumber(a);
+	        self.isNumber(b);
+	        return a+b;
+	      } ))/(data.length);
+	    },
+	    median: function(start, end) {
+	      var length = end-start+1;
+	      var m = length/2;
+	      if (length%2 === 0) {
+	        return [start+m-1,start+m];
+	      }
+	      if (length%2 === 1) {
+	        return [start+Math.floor(m)];
+	      }
 	    }
 	  };
 
