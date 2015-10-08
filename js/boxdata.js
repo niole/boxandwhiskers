@@ -2,9 +2,13 @@ var calculate = require('./calculations');
 
 module.exports = (function() {
   function BoxData(data) {
-    this.data = data;
-    this.IQR = this.getIQR(data);
-    this.getEndVals(this.IQR, data, this.q1Val, this.q3Val);
+    this.data = data.data.sort(function(a,b) {
+      return a-b;
+    });
+    this.label = data.label;
+    this.index = data.index;
+    this.IQR = this.getIQR(this.data);
+    this.setEndVals(this.IQR, this.data, this.q1Val, this.q3Val);
   }
 
   BoxData.prototype.indxToVal = function(idxs, data) {
@@ -13,7 +17,7 @@ module.exports = (function() {
     });
   };
 
-  BoxData.prototype.getEndVals = function(IQR, data, q1Val, q3Val) {
+  BoxData.prototype.setEndVals = function(IQR, data, q1Val, q3Val) {
     var maxDist = IQR*(1.5);
     this.outliers = [];
     for (var i=0; i < data.length; i++) {
