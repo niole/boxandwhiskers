@@ -17,15 +17,35 @@ module.exports = (function() {
       //widht is width of graph/length data
       //
       newData["height"] = Math.abs(this.yscale(newData["q3Val"]) - this.yscale(newData["q1Val"]));
-      newData["width"] = (width/data.length) - 5;
+      newData["width"] = (width/data.length);
       return newData;
     }.bind(this));
+
+    this.whiskerData = this.getWhiskerInstructions(this.data);
     this.svg = d3.select('body').append('svg')
                 .attr("width", width)
                 .attr("height", height);
     this.buildGraph(this.data);
   }
 
+  Graph.prototype.getWhiskerInstructions = function(data) {
+    //takes whiskers attribute and returns array of instructions
+    //for drawing path of whiskers
+    return _.map(data, function(d) {
+      return _.map(d.whiskers, function(w) {
+        //return array of objects with actual px data points
+        return _.flatten([{"y": this.yscale(w.innerInd),
+                "x": this.xscale(d.index) + d.width/2},
+                {"y": this.yscale(w.outerInd),
+                "x": this.xscale(d.index) + d.width/2},
+                {"y": this.yscale(w.outerInd),
+                  "x": this.xscale(d.index) + d.width/2 - 5},
+                {"y": this.yscale(w.outerInd),
+                  "x": this.xscale(d.index) + d.width/2 + 5}]
+                        );
+        }.bind(this))
+    }.bind(this));
+  };
 
   Graph.prototype.buildGraph = function(data) {
     var graph = this;
