@@ -10,10 +10,13 @@ var _ = require('lodash');
 module.exports = (function() {
   function Graph(height, width, data, vertical) {
     extend(Graph, [new GraphData( height, width, data, vertical)]);
+    this.medianData = [];
     this.data = _.map(data, function(d) {
       var newData = new BoxData(d);
       newData["height"] = Math.abs(this.yscale(newData["q3Val"]) - this.yscale(newData["q1Val"]));
       newData["width"] = (width/data.length);
+      this.medianData.push([{"x": this.xscale(newData.index), "y": this.yscale(newData.q2Val)},
+                            {"x": this.xscale(newData.index)+newData.width, "y": this.yscale(newData.q2Val)}]);
       return newData;
     }.bind(this));
 
@@ -48,14 +51,28 @@ module.exports = (function() {
   Graph.prototype.buildGraph = function(data) {
     var graph = this;
 
-    this.boxes = this.svg.append("g");
-
-    this.whiskerFunction = d3.svg.line()
+    this.lineFunction = d3.svg.line()
                              .x(function(d) { return d.x; })
                              .y(function(d) { return d.y; })
                              .interpolate("linear");
 
-    this.whiskers = this.svg.selectAll("path")
+    this.median = this.svg.selectAll(".median")
+                       .data(this.medianData);
+
+    this.median
+        .enter()
+        .append("path");
+
+    this.median
+        .select("path");
+
+    this.median
+          .attr("d", function(d) { return graph.lineFunction(d); })
+          .attr("stroke", "black")
+          .attr("stroke-width", 1)
+          .attr("fill", "none");
+
+    this.whiskers = this.svg.selectAll(".whiskers")
                        .data(this.whiskerData);
 
     this.whiskers
@@ -66,7 +83,7 @@ module.exports = (function() {
         .select("path");
 
     this.whiskers
-          .attr("d", function(d) { return graph.whiskerFunction(d); })
+          .attr("d", function(d) { return graph.lineFunction(d); })
           .attr("stroke", "black")
           .attr("stroke-width", 1)
           .attr("fill", "none");
@@ -96,6 +113,15 @@ module.exports = (function() {
     this.rects
       .exit()
       .remove();
+
+    this.whiskers
+      .exit()
+      .remove();
+
+    this.median
+      .exit()
+      .remove();
+
 
   };
 
