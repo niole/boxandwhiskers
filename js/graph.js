@@ -12,10 +12,6 @@ module.exports = (function() {
     extend(Graph, [new GraphData( height, width, data, vertical)]);
     this.data = _.map(data, function(d) {
       var newData = new BoxData(d);
-      //add height, width, to data obj
-      //get means of q3 and q1, then use yscale to get height
-      //widht is width of graph/length data
-      //
       newData["height"] = Math.abs(this.yscale(newData["q3Val"]) - this.yscale(newData["q1Val"]));
       newData["width"] = (width/data.length);
       return newData;
@@ -29,28 +25,47 @@ module.exports = (function() {
   }
 
   Graph.prototype.getWhiskerInstructions = function(data) {
-    //takes whiskers attribute and returns array of instructions
-    //for drawing path of whiskers
-    return _.map(data, function(d) {
+    return _.flatten(_.map(data, function(d) {
       return _.map(d.whiskers, function(w) {
         //return array of objects with actual px data points
-        return _.flatten([{"y": this.yscale(w.innerInd),
+        //get value of innerindexes and their means
+        return [{"y": this.yscale(calculations.mean(d.indxToVal(w.innerInd, d.data))),
                 "x": this.xscale(d.index) + d.width/2},
-                {"y": this.yscale(w.outerInd),
+                {"y": this.yscale(d.data[w.outerInd]),
                 "x": this.xscale(d.index) + d.width/2},
-                {"y": this.yscale(w.outerInd),
+                {"y": this.yscale(d.data[w.outerInd]),
                   "x": this.xscale(d.index) + d.width/2 - 5},
-                {"y": this.yscale(w.outerInd),
-                  "x": this.xscale(d.index) + d.width/2 + 5}]
-                        );
-        }.bind(this))
-    }.bind(this));
+                {"y": this.yscale(d.data[w.outerInd]),
+                  "x": this.xscale(d.index) + d.width/2 + 5}];
+        }.bind(this));
+    }.bind(this)));
   };
 
   Graph.prototype.buildGraph = function(data) {
     var graph = this;
 
     this.boxes = this.svg.append("g");
+
+    this.whiskerFunction = d3.svg.line()
+                             .x(function(d) { return d.x; })
+                             .y(function(d) { return d.y; })
+                             .interpolate("linear");
+
+    this.whiskers = this.svg.selectAll("path")
+                       .data(this.whiskerData);
+
+    this.whiskers
+        .enter()
+        .append("path");
+
+    this.whiskers
+        .select("path");
+
+    this.whiskers
+          .attr("d", function(d) { return graph.whiskerFunction(d); })
+          .attr("stroke", "blue")
+          .attr("stroke-width", 2)
+          .attr("fill", "none");
 
     this.rects = this.svg.selectAll("rect")
                              .data(data);
