@@ -9,7 +9,7 @@ var _ = require('lodash');
 
 module.exports = (function() {
   function Graph(height, width, data, vertical) {
-    extend(Graph, new GraphData( height, width, data, vertical));
+    extend(Graph, [new GraphData( height, width, data, vertical)]);
     this.data = _.map(data, function(d) {
       var newData = new BoxData(d);
       //add height, width, to data obj

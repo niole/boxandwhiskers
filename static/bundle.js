@@ -84,7 +84,7 @@
 
 	module.exports = (function() {
 	  function Graph(height, width, data, vertical) {
-	    extend(Graph, new GraphData( height, width, data, vertical));
+	    extend(Graph, [new GraphData( height, width, data, vertical)]);
 	    this.data = _.map(data, function(d) {
 	      var newData = new BoxData(d);
 	      //add height, width, to data obj
@@ -118,7 +118,6 @@
 
 	    this.rects
 	      .attr("x", function(d) {
-	        console.log(d);
 	        return graph.xscale(d.index);
 	      })
 	      .attr("y", function(d) {
@@ -21801,13 +21800,15 @@
 /***/ function(module, exports) {
 
 	module.exports = function(a,b) {
-	    //extends a with b by
-	    //putting b on a's prototype
-	    for (var k in b) {
-	      if (!a.hasOwnProperty(k)) {
-	        a.prototype[k] = b[k];
+	    //extends a with each object in array b by
+	    //putting each of b on a's prototype
+	    b.forEach(function(o) {
+	      for (var k in o) {
+	        if (!a.hasOwnProperty(k)) {
+	          a.prototype[k] = o[k];
+	        }
 	      }
-	    }
+	    });
 	  };
 
 
