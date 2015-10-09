@@ -34,6 +34,8 @@ module.exports = (function() {
     this.yscale = d3.scale.linear()
                   .domain([minval, max])
                   .range([height, 0]);
+
+    console.log(this.yscale(3));
   };
 
   GraphData.prototype.setxscale = function(min, max, width) {

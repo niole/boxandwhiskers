@@ -60,8 +60,8 @@
 	    var height = 500;
 	    var width = 500;
 	    var data = [
-	      {index: 0, label: "q1", data: [6,8,5,3,7,22,6]},
-	      {index: 1, label: "q0", data: [6,8,5,3,7,22,0,3,2,1,3,7,6]}
+	      {index: 0, label: "q1", data: [1,2,3,4,5,66,77,3,6,8,2,3,8,43,73,88]},
+	      {index: 1, label: "q0", data: [45,62,73,74,75,88,99,55,55,55,55,55,55,55,55]}
 	    ];
 	    var vertical = true;
 	    var graph = new Graph(height, width, data, vertical);
@@ -74,38 +74,52 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var GraphData = __webpack_require__(3);
+	var extend = __webpack_require__(8);
+	var calculations = __webpack_require__(9);
+	var BoxData = __webpack_require__(10);
+	var Box = __webpack_require__(11);
 	var d3 = __webpack_require__(4);
 	var $ = __webpack_require__(5);
 	var _ = __webpack_require__(6);
 
 	module.exports = (function() {
 	  function Graph(height, width, data, vertical) {
-	    var gd = new GraphData(height, width, data, vertical);
-	    this.xscale = gd.xscale;
-	    this.yscale = gd.xscale;
+	    extend(Graph, new GraphData( height, width, data, vertical));
+	    this.data = _.map(data, function(d) {
+	      return new BoxData(d);
+	    });
 	    this.svg = d3.select('body').append('svg')
 	                .attr("width", width)
 	                .attr("height", height);
-	    this.buildBoxes(data);
+	    this.buildGraph(this.data);
 	  }
 
-	  Graph.prototype.buildBoxes = function(data) {
+
+	  Graph.prototype.buildGraph = function(data) {
 	    var graph = this;
-	    this.boxes = this.svg.selectAll("circle")
-	                                  .data(data);
-	    this.boxes
+
+	    this.boxes = this.svg.append("g");
+
+	    this.rects = this.svg.selectAll("rect")
+	                             .data(data);
+	    this.rects
 	        .enter()
-	        .append("circle");
+	        .append("rect");
 
-	    this.boxes
-	      .select("circle");
+	    this.rects
+	      .select("rect");
 
-	    this.boxes
-	      .attr("cx", function(d) { return graph.xscale(d.index); })
-	      .attr("cy", 200)
-	      .attr("r", 20);
+	    this.rects
+	      .attr("x", function(d) {
+	        return graph.xscale(d.index);
+	      })
+	      .attr("y", function(d) {
+	        return graph.yscale(calculations.mean(d.indxToVal(d.q1, d.data))) - 200;
+	      })
+	      .attr("width", 200)
+	      .attr("height", 200);
 
-	    this.boxes
+	    this.rects
 	      .exit()
 	      .remove();
 
@@ -155,6 +169,8 @@
 	    this.yscale = d3.scale.linear()
 	                  .domain([minval, max])
 	                  .range([height, 0]);
+
+	    console.log(this.yscale(3));
 	  };
 
 	  GraphData.prototype.setxscale = function(min, max, width) {
@@ -21770,6 +21786,132 @@
 		}
 		return module;
 	}
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	module.exports = function(a,b) {
+	    //extends a with b by
+	    //putting b on a's prototype
+	    for (var k in b) {
+	      if (!a.hasOwnProperty(k)) {
+	        a.prototype[k] = b[k];
+	      }
+	    }
+	  };
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports =  {
+	    isNumber: function(n) {
+	      if (isNaN(n) || n === null || n === 'undefined') {
+	        throw Error('an element in your array is not a number');
+	      }
+	    },
+	    sum: function(data) {
+	      var self = this;
+	      return data.reduce(function(a,b) {
+	        self.isNumber(a);
+	        self.isNumber(b);
+	        return a+b;
+	      });
+	    },
+	    mean: function(data) {
+	      return (this.sum(data))/(data.length);
+	    },
+	    median: function(start, end) {
+	      var length = end-start+1;
+	      var m = length/2;
+	      if (length%2 === 0) {
+	        return [start+m-1,start+m];
+	      }
+	      if (length%2 === 1) {
+	        return [start+Math.floor(m)];
+	      }
+	    }
+	};
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var calculate = __webpack_require__(9);
+
+	module.exports = (function() {
+	  function BoxData(data) {
+	    this.data = data.data.sort(function(a,b) {
+	      return a-b;
+	    });
+	    this.label = data.label;
+	    this.index = data.index;
+	    this.IQR = this.getIQR(this.data);
+	    this.setEndVals(this.IQR, this.data, this.q1Val, this.q3Val);
+	  }
+
+	  BoxData.prototype.indxToVal = function(idxs, data) {
+	    return idxs.map(function(i) {
+	      return data[i];
+	    });
+	  };
+
+	  BoxData.prototype.setEndVals = function(IQR, data, q1Val, q3Val) {
+	    var maxDist = IQR*(1.5);
+	    this.outliers = [];
+	    for (var i=0; i < data.length; i++) {
+	      if (data[i] < q1Val-maxDist) {
+	        this.outliers.push(i);
+	      } else {
+	        this.startIndWhisker = i;
+	        break;
+	      }
+	    }
+	    for (var j=data.length-1; j >= 0; j--) {
+	      if (data[j] > q3Val+maxDist) {
+	        this.outliers.push(j);
+	      } else {
+	        this.endIndWhisker = j;
+	        break;
+	      }
+	    }
+	  };
+
+	  BoxData.prototype.getIQR = function(data) {
+	    this.q2 = calculate.median(0, data.length-1);
+	    this.q1 = calculate.median(0, this.q2[0]);
+	    this.q3 = calculate.median(this.q2[this.q2.length-1], data.length-1);
+	    this.q2Val = calculate.sum(this.indxToVal(this.q2, data))/(this.q2.length);
+	    this.q1Val = calculate.sum(this.indxToVal(this.q1, data))/(this.q1.length);
+	    this.q3Val = calculate.sum(this.indxToVal(this.q3, data))/(this.q3.length);
+	    return Math.abs(this.q3Val-this.q1Val);
+	  };
+
+	  return BoxData;
+	}());
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var d3 = __webpack_require__(4);
+	var $ = __webpack_require__(5);
+	var boxData = __webpack_require__(10);
+
+	module.exports = (function() {
+	  function Box(data, graphdata, pos) {
+	    //boxData will sort data if necessary
+	  }
+
+	  return Box;
+	}());
 
 
 /***/ }

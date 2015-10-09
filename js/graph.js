@@ -1,36 +1,50 @@
 var GraphData = require('./graphdata');
+var extend = require('./extends');
+var calculations = require('./calculations');
+var BoxData = require('./boxdata');
+var Box = require('./box');
 var d3 = require('d3');
 var $ = require('jquery');
 var _ = require('lodash');
 
 module.exports = (function() {
   function Graph(height, width, data, vertical) {
-    var gd = new GraphData(height, width, data, vertical);
-    this.xscale = gd.xscale;
-    this.yscale = gd.xscale;
+    extend(Graph, new GraphData( height, width, data, vertical));
+    this.data = _.map(data, function(d) {
+      return new BoxData(d);
+    });
     this.svg = d3.select('body').append('svg')
                 .attr("width", width)
                 .attr("height", height);
-    this.buildBoxes(data);
+    this.buildGraph(this.data);
   }
 
-  Graph.prototype.buildBoxes = function(data) {
+
+  Graph.prototype.buildGraph = function(data) {
     var graph = this;
-    this.boxes = this.svg.selectAll("circle")
-                                  .data(data);
-    this.boxes
+
+    this.boxes = this.svg.append("g");
+
+    this.rects = this.svg.selectAll("rect")
+                             .data(data);
+    this.rects
         .enter()
-        .append("circle");
+        .append("rect");
 
-    this.boxes
-      .select("circle");
+    this.rects
+      .select("rect");
 
-    this.boxes
-      .attr("cx", function(d) { return graph.xscale(d.index); })
-      .attr("cy", 200)
-      .attr("r", 20);
+    this.rects
+      .attr("x", function(d) {
+        return graph.xscale(d.index);
+      })
+      .attr("y", function(d) {
+        return graph.yscale(calculations.mean(d.indxToVal(d.q1, d.data))) - 200;
+      })
+      .attr("width", 200)
+      .attr("height", 200);
 
-    this.boxes
+    this.rects
       .exit()
       .remove();
 
