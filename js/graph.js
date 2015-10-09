@@ -11,8 +11,15 @@ module.exports = (function() {
   function Graph(height, width, data, vertical) {
     extend(Graph, new GraphData( height, width, data, vertical));
     this.data = _.map(data, function(d) {
-      return new BoxData(d);
-    });
+      var newData = new BoxData(d);
+      //add height, width, to data obj
+      //get means of q3 and q1, then use yscale to get height
+      //widht is width of graph/length data
+      //
+      newData["height"] = Math.abs(this.yscale(newData["q3Val"]) - this.yscale(newData["q1Val"]));
+      newData["width"] = (width/data.length) - 5;
+      return newData;
+    }.bind(this));
     this.svg = d3.select('body').append('svg')
                 .attr("width", width)
                 .attr("height", height);
@@ -39,10 +46,10 @@ module.exports = (function() {
         return graph.xscale(d.index);
       })
       .attr("y", function(d) {
-        return graph.yscale(calculations.mean(d.indxToVal(d.q1, d.data))) - 200;
+        return graph.yscale(calculations.mean(d.indxToVal(d.q1, d.data))) - d.height;
       })
-      .attr("width", 200)
-      .attr("height", 200);
+      .attr("width", function(d) { return d.width; })
+      .attr("height", function(d) { return d.height; });
 
     this.rects
       .exit()
