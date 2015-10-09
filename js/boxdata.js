@@ -7,6 +7,7 @@ module.exports = (function() {
     });
     this.label = data.label;
     this.index = data.index;
+    this.whiskers = [{}, {}];
     this.IQR = this.getIQR(this.data);
     this.setEndVals(this.IQR, this.data, this.q1Val, this.q3Val);
   }
@@ -24,7 +25,7 @@ module.exports = (function() {
       if (data[i] < q1Val-maxDist) {
         this.outliers.push(i);
       } else {
-        this.startIndWhisker = i;
+        this.whiskers[0].outerInd = i;
         break;
       }
     }
@@ -32,7 +33,7 @@ module.exports = (function() {
       if (data[j] > q3Val+maxDist) {
         this.outliers.push(j);
       } else {
-        this.endIndWhisker = j;
+        this.whiskers[1].outerInd = j;
         break;
       }
     }
@@ -42,6 +43,8 @@ module.exports = (function() {
     this.q2 = calculate.median(0, data.length-1);
     this.q1 = calculate.median(0, this.q2[0]);
     this.q3 = calculate.median(this.q2[this.q2.length-1], data.length-1);
+    this.whiskers[1].innerInd = calculate.mean(this.q3);
+    this.whiskers[0].innerInd = calculate.mean(this.q1);
     this.q2Val = calculate.mean(this.indxToVal(this.q2, data));
     this.q1Val = calculate.mean(this.indxToVal(this.q1, data));
     this.q3Val = calculate.mean(this.indxToVal(this.q3, data));
