@@ -21887,9 +21887,9 @@
 	    this.q2 = calculate.median(0, data.length-1);
 	    this.q1 = calculate.median(0, this.q2[0]);
 	    this.q3 = calculate.median(this.q2[this.q2.length-1], data.length-1);
-	    this.q2Val = calculate.sum(this.indxToVal(this.q2, data))/(this.q2.length);
-	    this.q1Val = calculate.sum(this.indxToVal(this.q1, data))/(this.q1.length);
-	    this.q3Val = calculate.sum(this.indxToVal(this.q3, data))/(this.q3.length);
+	    this.q2Val = calculate.mean(this.indxToVal(this.q2, data));
+	    this.q1Val = calculate.mean(this.indxToVal(this.q1, data));
+	    this.q3Val = calculate.mean(this.indxToVal(this.q3, data));
 	    return Math.abs(this.q3Val-this.q1Val);
 	  };
 
