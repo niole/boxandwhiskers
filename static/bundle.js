@@ -93,7 +93,6 @@
 	    }.bind(this));
 
 	    this.whiskerData = this.getWhiskerInstructions(this.data);
-	    console.log(this.whiskerData);
 	    this.svg = d3.select('body').append('svg')
 	                .attr("width", width)
 	                .attr("height", height);
@@ -101,10 +100,14 @@
 	  }
 
 	  Graph.prototype.getWhiskerInstructions = function(data) {
+	    /*
+	      returns array of arrays
+	      inner arrays contain objects of
+	      actual px values for drawing x and y coords
+	      for all whiskers
+	    */
 	    return _.flatten(_.map(data, function(d) {
 	      return _.map(d.whiskers, function(w) {
-	        //return array of objects with actual px data points
-	        //get value of innerindexes and their means
 	        return [{"y": this.yscale(calculations.mean(d.indxToVal(w.innerInd, d.data))),
 	                "x": this.xscale(d.index) + d.width/2},
 	                {"y": this.yscale(d.data[w.outerInd]),
@@ -139,8 +142,8 @@
 
 	    this.whiskers
 	          .attr("d", function(d) { return graph.whiskerFunction(d); })
-	          .attr("stroke", "blue")
-	          .attr("stroke-width", 2)
+	          .attr("stroke", "black")
+	          .attr("stroke-width", 1)
 	          .attr("fill", "none");
 
 	    this.rects = this.svg.selectAll("rect")
@@ -160,7 +163,10 @@
 	        return graph.yscale(calculations.mean(d.indxToVal(d.q1, d.data))) - d.height;
 	      })
 	      .attr("width", function(d) { return d.width; })
-	      .attr("height", function(d) { return d.height; });
+	      .attr("height", function(d) { return d.height; })
+	      .style("stroke", "black")
+	      .style("fill", "none")
+	      .style("stroke-width", 1);
 
 	    this.rects
 	      .exit()
@@ -213,7 +219,6 @@
 	                  .domain([minval, max])
 	                  .range([height, 0]);
 
-	    console.log(this.yscale(3));
 	  };
 
 	  GraphData.prototype.setxscale = function(min, max, width) {
