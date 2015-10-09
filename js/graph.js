@@ -24,7 +24,7 @@ module.exports = (function() {
     this.svg = d3.select('body').append('svg')
                 .attr("width", width)
                 .attr("height", height);
-    this.buildGraph(this.data);
+    this.buildGraph(this.data, this.medianData, this.whiskerData);
   }
 
   Graph.prototype.getWhiskerInstructions = function(data) {
@@ -48,7 +48,7 @@ module.exports = (function() {
     }.bind(this)));
   };
 
-  Graph.prototype.buildGraph = function(data) {
+  Graph.prototype.buildGraph = function(data, medianData, whiskerData) {
     var graph = this;
 
     this.lineFunction = d3.svg.line()
@@ -57,7 +57,7 @@ module.exports = (function() {
                              .interpolate("linear");
 
     this.median = this.svg.selectAll(".median")
-                       .data(this.medianData);
+                       .data(medianData);
 
     this.median
         .enter()
@@ -73,7 +73,7 @@ module.exports = (function() {
           .attr("fill", "none");
 
     this.whiskers = this.svg.selectAll(".whiskers")
-                       .data(this.whiskerData);
+                       .data(whiskerData);
 
     this.whiskers
         .enter()

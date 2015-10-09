@@ -99,7 +99,7 @@
 	    this.svg = d3.select('body').append('svg')
 	                .attr("width", width)
 	                .attr("height", height);
-	    this.buildGraph(this.data);
+	    this.buildGraph(this.data, this.medianData, this.whiskerData);
 	  }
 
 	  Graph.prototype.getWhiskerInstructions = function(data) {
@@ -123,7 +123,7 @@
 	    }.bind(this)));
 	  };
 
-	  Graph.prototype.buildGraph = function(data) {
+	  Graph.prototype.buildGraph = function(data, medianData, whiskerData) {
 	    var graph = this;
 
 	    this.lineFunction = d3.svg.line()
@@ -132,7 +132,7 @@
 	                             .interpolate("linear");
 
 	    this.median = this.svg.selectAll(".median")
-	                       .data(this.medianData);
+	                       .data(medianData);
 
 	    this.median
 	        .enter()
@@ -142,15 +142,13 @@
 	        .select("path");
 
 	    this.median
-	          .attr("d", function(d) {
-	            console.log(d);
-	            return graph.lineFunction(d); })
+	          .attr("d", function(d) { return graph.lineFunction(d); })
 	          .attr("stroke", "black")
 	          .attr("stroke-width", 1)
 	          .attr("fill", "none");
 
 	    this.whiskers = this.svg.selectAll(".whiskers")
-	                       .data(this.whiskerData);
+	                       .data(whiskerData);
 
 	    this.whiskers
 	        .enter()
